@@ -32,7 +32,7 @@
   /* heart floaters */
   .hearts{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:2}
   .heart{position:absolute;width:18px;height:18px;background:linear-gradient(180deg,#ff7aa0,#ff4770);transform:rotate(-45deg);border-radius:4px 4px 16px 16px;opacity:.95}
-  /* second screen */
+  /* final box */
   .screen2{display:none;padding:24px;text-align:center}
   .screen2.show{display:block;animation:fadeIn .45s ease}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -86,7 +86,7 @@
 
     <!-- final box (shown after yes) -->
     <div class="screen2" id="screen2" aria-hidden="true">
-      <div class="finalBox">
+      <div class="finalBox" role="status" aria-live="polite">
         <h3 style="margin:0;color:#8a3140">YAY - Thank you, Shortie!</h3>
         <p style="margin-top:8px;color:var(--muted)">I knew you'd say yes</p>
         <div class="finalHeart" id="finalHeart">❤️ ❤️ ❤️</div>
@@ -141,12 +141,16 @@ const card = document.getElementById('card');
 const finalHeart = document.getElementById('finalHeart');
 
 /* ---------- Build reasons (hidden) ---------- */
-reasonsList.forEach((r,i)=>{
-  const el = document.createElement('div');
-  el.className = 'reason';
-  el.innerHTML = `<div class="dot">❤</div><p>${r}</p>`;
-  reasonsEl.appendChild(el);
-});
+function buildReasons(){
+  reasonsEl.innerHTML = ''; // ensure fresh
+  reasonsList.forEach((r,i)=>{
+    const el = document.createElement('div');
+    el.className = 'reason';
+    el.innerHTML = `<div class="dot">❤</div><p>${r}</p>`;
+    reasonsEl.appendChild(el);
+  });
+}
+buildReasons();
 
 /* ---------- Tooltip helper ---------- */
 function showTooltip(text){
@@ -222,8 +226,75 @@ noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); moveNo(); 
 // click fallback
 noBtn.addEventListener('click', function(e){ e.preventDefault(); showTooltip("Nice try 😅"); moveNo(); });
 
-/* ---------- Yes behavior: confetti + final box + heartbeat ---------- */
+/* ---------- Simple chime + sparkle sound using WebAudio ---------- */
+function playYesChime(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+
+    const freqs = [880, 1100, 1320, 1760]; // ascending sparkle
+    freqs.forEach((f, i) => {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      o.connect(master);
+      o.start(now + i * 0.06);
+      o.stop(now + i * 0.06 + 0.18);
+    });
+
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.type = 'sawtooth';
+    bass.frequency.value = 160;
+    bassGain.gain.setValueAtTime(0.0001, now);
+    bassGain.gain.exponentialRampToValueAtTime(0.16, now + 0.02);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bass.start(now);
+    bass.stop(now + 0.45);
+  }catch(e){
+    console.warn('Audio not available', e);
+  }
+}
+
+/* ---------- Text-to-Speech: speak the final lines ---------- */
+function speakFinalLines(){
+  if (!('speechSynthesis' in window)) return;
+  try {
+    // Cancel any previous queued speech
+    window.speechSynthesis.cancel();
+
+    // First line
+    const u1 = new SpeechSynthesisUtterance("YAY. Thank you, Shortie!");
+    u1.rate = 0.95;
+    u1.pitch = 1.05;
+
+    // Second line
+    const u2 = new SpeechSynthesisUtterance("I knew you'd say yes.");
+    u2.rate = 0.95;
+    u2.pitch = 1.05;
+
+    // On end of first, speak second
+    u1.onend = () => { try { window.speechSynthesis.speak(u2); } catch(e){ } };
+
+    // Speak first (user gesture required - click qualifies)
+    window.speechSynthesis.speak(u1);
+  } catch(e) { console.warn('TTS failed', e); }
+}
+
+/* ---------- Yes behavior: chime + TTS + confetti + final box + heartbeat ---------- */
 yesBtn.addEventListener('click', function(){
+  // speak the final lines (this is the "person who spoke" feature)
+  speakFinalLines();
+
+  // play chime
+  playYesChime();
+
   yesBtn.disabled = true; noBtn.disabled = true;
   startConfetti();
   yesBtn.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.2,.9,.3,1)'});
@@ -231,15 +302,13 @@ yesBtn.addEventListener('click', function(){
   setTimeout(()=> yesBtn.classList.remove('pulse'), 1200);
 
   setTimeout(()=> {
-    // hide the controls and reasons, show final box like your screenshot
+    // hide the controls and reasons, show final box (matching your screenshot text)
     document.querySelector('.reasons').style.display='none';
     document.querySelector('.controls').style.display='none';
     screen2.classList.add('show');
     spawnHearts(18);
     finalHeart.classList.add('heartbeat'); // continuous heartbeat
-    // update yes button text to "You said yes!" if you like (keeps page consistent)
     yesBtn.textContent = "You said yes! ❤";
-    // optional: keep yes visible as confirmation (not necessary) - we'll leave it visible to mirror screenshot
   }, 420);
 });
 
@@ -317,9 +386,12 @@ function animateHeart(el){
 
 /* ---------- No automatic reveals on load; user must trigger ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  // ensure reasons are hidden at start
+  // ensure reasons are hidden and cleared on start
   reasonsEl.style.display = 'none';
   reasonsEl.setAttribute('aria-hidden','true');
+  shown = 0;
+  lastReveal = 0;
+  Array.from(reasonsEl.children).forEach(node => node.classList.remove('show'));
   // gentle one-heart interval in background
   setInterval(()=> spawnHearts(1), 3500);
 });
