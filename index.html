@@ -159,17 +159,23 @@ function positionTooltip(){
   tooltip.style.top = top + 'px';
 }
 
-/* ---------- Reveal reasons one-by-one ---------- */
+/* ---------- Reveal reasons one-by-one with cooldown ---------- */
 let shown = 0;
+let lastReveal = 0;            // timestamp for cooldown
+const REVEAL_COOLDOWN = 800;   // ms between reveals
+
 function revealReason(){
-  if(shown >= reasonsList.length) return;
+  const now = Date.now();
+  if (shown >= reasonsList.length) return;
+  if (now - lastReveal < REVEAL_COOLDOWN) return; // still cooling down
   const node = reasonsEl.children[shown];
   node.classList.add('show');
-  node.style.transitionDelay = (shown * 50) + 'ms';
+  node.style.transitionDelay = (shown * 80) + 'ms';
   shown++;
+  lastReveal = now;
 }
 
-/* ---------- Move NO button to random safe place ---------- */
+/* ---------- Move NO button to random safe place (on hover/touch/click) ---------- */
 function moveNo(){
   const cardRect = card.getBoundingClientRect();
   const noRect = noBtn.getBoundingClientRect();
@@ -191,7 +197,7 @@ function moveNo(){
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 
-  // show short hover msg and reveal a reason
+  // show short hover msg and reveal a reason (subject to cooldown)
   const msg = hoverMessages[Math.floor(Math.random() * hoverMessages.length)];
   showTooltip(msg);
   revealReason();
@@ -206,9 +212,7 @@ noBtn.addEventListener('click', function(e){ e.preventDefault(); showTooltip("Ni
 yesBtn.addEventListener('click', function(){
   yesBtn.disabled = true; noBtn.disabled = true;
   startConfetti();
-  // a small pop
   yesBtn.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.2,.9,.3,1)'});
-  // temporary gentle pulse on yes (3 iterations)
   yesBtn.classList.add('pulse');
   setTimeout(()=> yesBtn.classList.remove('pulse'), 1200);
 
@@ -217,8 +221,7 @@ yesBtn.addEventListener('click', function(){
     document.querySelector('.controls').style.display='none';
     screen2.classList.add('show');
     spawnHearts(18);
-    // add continuous heartbeat to final heart
-    finalHeart.classList.add('heartbeat');
+    finalHeart.classList.add('heartbeat'); // continuous heartbeat
   }, 420);
 });
 
@@ -228,7 +231,6 @@ backBtn.addEventListener('click', function(){
   document.querySelector('.reasons').style.display='';
   document.querySelector('.controls').style.display='';
   yesBtn.disabled = false; noBtn.disabled = false;
-  // remove heartbeat in case user goes back
   finalHeart.classList.remove('heartbeat');
 });
 
@@ -288,11 +290,11 @@ function animateHeart(el){
   }
 })();
 
-/* ---------- small accessibility: reveal 2 reasons on load ---------- */
+/* ---------- No automatic reveals on load; user must trigger ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  setTimeout(()=> revealReason(), 480);
-  setTimeout(()=> revealReason(), 980);
-  setInterval(()=> spawnHearts(1), 2500);
+  // Do NOT auto-reveal reasons — user should hover/tap 'No' to reveal.
+  // Keep a gentle single-heart spawn interval in background
+  setInterval(()=> spawnHearts(1), 3000);
 });
 
 /* ---------- small extra: gentle card hover bounce ---------- */
