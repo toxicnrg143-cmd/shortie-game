@@ -7,7 +7,6 @@
 <style>
   :root{
     --bg:#fff4f8; --card:#fff; --accent:#ff6b81; --muted:#6b6b6b;
-    --accent-2:#ffd166; --accent-3:#7ae7c7;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;background:linear-gradient(180deg,var(--bg),#fff);-webkit-font-smoothing:antialiased}
@@ -25,15 +24,11 @@
   #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:180px;font-weight:600;transform-origin:center}
   #no{background:#f3f3f4;color:#111;min-width:110px;position:absolute;right:18px;top:12px}
   /* reasons area */
-  .reasons{margin-top:18px;text-align:left;max-height:200px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff8fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+  .reasons{margin-top:18px;text-align:left;max-height:220px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff8fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
   .reason{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;opacity:0;transform:translateY(12px) scale(.98)}
   .reason.show{opacity:1;transform:none;transition:all .36s cubic-bezier(.2,.9,.3,1)}
-  .reason .dot{width:22px;height:22px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:12px}
+  .reason .dot{width:18px;height:18px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px}
   .reason p{margin:0;color:#333;font-size:14px}
-  /* gallery */
-  .gallery{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-  .thumb{width:72px;height:72px;border-radius:10px;overflow:hidden;border:2px solid rgba(0,0,0,0.04);cursor:pointer;object-fit:cover;box-shadow:0 10px 26px rgba(20,10,30,0.05);transition:transform .15s}
-  .thumb:hover{transform:scale(1.06)}
   /* heart floaters */
   .hearts{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:2}
   .heart{position:absolute;width:18px;height:18px;background:linear-gradient(180deg,#ff7aa0,#ff4770);transform:rotate(-45deg);border-radius:4px 4px 16px 16px;opacity:.95}
@@ -41,20 +36,30 @@
   .screen2{display:none;padding:24px;text-align:center}
   .screen2.show{display:block;animation:fadeIn .45s ease}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  .finalHeart{font-size:46px;margin-top:10px;animation:pop 700ms cubic-bezier(.2,.9,.3,1)}
-  @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.08)}100%{transform:none}}
+  .finalHeart{font-size:46px;margin-top:10px;display:inline-block}
   /* tooltip */
   .tooltip{position:fixed;padding:7px 10px;border-radius:10px;background:#222;color:#fff;font-size:13px;transform:translateY(-8px);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s,left .08s,top .08s}
   .tooltip.show{opacity:1}
-  /* modal for gallery */
-  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:999}
-  .modal.show{display:flex}
-  .modal img{max-width:92%;max-height:84%;border-radius:12px;box-shadow:0 18px 60px rgba(10,10,20,0.6)}
+  /* heartbeat pulse */
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.12); }
+    40% { transform: scale(0.98); }
+    60% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .heartbeat { animation: heartbeat 900ms cubic-bezier(.2,.9,.3,1) infinite; }
+  /* yes pulse (short) */
+  @keyframes gentlePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  #yes.pulse { animation: gentlePulse 900ms ease-in-out 3; }
   /* responsive */
   @media (max-width:520px){
     .card{padding:18px}
     #no{right:12px;top:10px}
-    .thumb{width:60px;height:60px}
   }
 </style>
 </head>
@@ -78,16 +83,10 @@
 
     <div class="reasons" id="reasons" aria-live="polite"></div>
 
-    <div class="gallery" id="gallery">
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=31" src="https://picsum.photos/200/200?random=31" alt="mem1">
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=32" src="https://picsum.photos/200/200?random=32" alt="mem2">
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=33" src="https://picsum.photos/200/200?random=33" alt="mem3">
-    </div>
-
     <div class="screen2" id="screen2" aria-hidden="true">
       <h2>YAY — Thank you, Shortie! 😭❤️</h2>
       <p style="color:var(--muted)">I knew you'd say yes. Here’s to us. 💖</p>
-      <div class="finalHeart">💖</div>
+      <div class="finalHeart" id="finalHeart">💖</div>
       <div style="margin-top:18px">
         <button id="back" style="background:#fff;border:2px solid #ffdfe6;padding:10px 16px;border-radius:12px;cursor:pointer">Back</button>
       </div>
@@ -96,38 +95,34 @@
   </div>
 </div>
 
-<div class="modal" id="modal" aria-hidden="true">
-  <img id="modalImg" src="" alt="photo">
-</div>
-
 <canvas id="confetti" style="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999"></canvas>
 
 <script>
 /* ---------- Messages (short & cute) ---------- */
 const reasonsList = [
+  "Your smile 😭",
+  "You make me laugh 😊",
+  "We click ✨",
+  "I think about you 😳",
+  "I want to care for you ❤️",
+  "We'd be cute 🫶",
+  "You make things better 🌸",
+  "You deserve kindness 😌",
   "I already like you a lot 💗",
-  "Your smile = my favourite 😭",
-  "I’m happiest with you 😊",
-  "We click so naturally ✨",
-  "I want to treat you right ❤️",
-  "We’d be so cute together 🫶",
-  "You make everything better 🌸",
-  "I think about you kinda a lot 😳",
-  "You deserve someone who chooses you 😌",
-  "It’s always been you 💞"
+  "It feels right 💞"
 ];
 
 const hoverMessages = [
   "Do you not like me? 😟",
   "Pretty please? 🥺",
-  "Don’t run away 😭",
+  "Don't run away 😭",
   "Think again 👀",
   "I'll be really good 😇",
   "Consider this? 🥹",
   "Come onnn 😭",
   "Just one yes? 🌸",
-  "Why are you running 😭",
-  "You’re breaking my heart 😩❤️"
+  "Why are you running? 😭",
+  "Please? ❤️"
 ];
 
 /* ---------- Elements ---------- */
@@ -137,17 +132,15 @@ const yesBtn = document.getElementById('yes');
 const tooltip = document.getElementById('tooltip');
 const screen2 = document.getElementById('screen2');
 const backBtn = document.getElementById('back');
-const gallery = document.getElementById('gallery');
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modalImg');
 const hearts = document.getElementById('hearts');
 const card = document.getElementById('card');
+const finalHeart = document.getElementById('finalHeart');
 
 /* ---------- Build reasons (hidden) ---------- */
 reasonsList.forEach((r,i)=>{
   const el = document.createElement('div');
   el.className = 'reason';
-  el.innerHTML = `<div class="dot">❤️</div><p>${r}</p>`;
+  el.innerHTML = `<div class="dot">❤</div><p>${r}</p>`;
   reasonsEl.appendChild(el);
 });
 
@@ -156,7 +149,7 @@ function showTooltip(text){
   tooltip.textContent = text;
   tooltip.classList.add('show');
   positionTooltip();
-  setTimeout(()=> tooltip.classList.remove('show'),1400);
+  setTimeout(()=> tooltip.classList.remove('show'),1200);
 }
 function positionTooltip(){
   const noRect = noBtn.getBoundingClientRect();
@@ -172,7 +165,7 @@ function revealReason(){
   if(shown >= reasonsList.length) return;
   const node = reasonsEl.children[shown];
   node.classList.add('show');
-  node.style.transitionDelay = (shown * 60) + 'ms';
+  node.style.transitionDelay = (shown * 50) + 'ms';
   shown++;
 }
 
@@ -207,20 +200,25 @@ function moveNo(){
 /* ---------- No button events ---------- */
 noBtn.addEventListener('mouseenter', moveNo);
 noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); moveNo(); }, {passive:false});
-noBtn.addEventListener('click', function(e){ e.preventDefault(); showTooltip("Haha nice try 😅"); moveNo(); });
+noBtn.addEventListener('click', function(e){ e.preventDefault(); showTooltip("Nice try 😅"); moveNo(); });
 
-/* ---------- Yes behavior: confetti + second screen ---------- */
+/* ---------- Yes behavior: confetti + second screen + heartbeat ---------- */
 yesBtn.addEventListener('click', function(){
   yesBtn.disabled = true; noBtn.disabled = true;
   startConfetti();
-  // little pop animation
+  // a small pop
   yesBtn.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.2,.9,.3,1)'});
+  // temporary gentle pulse on yes (3 iterations)
+  yesBtn.classList.add('pulse');
+  setTimeout(()=> yesBtn.classList.remove('pulse'), 1200);
+
   setTimeout(()=> {
     document.querySelector('.reasons').style.display='none';
-    document.querySelector('.gallery').style.display='none';
     document.querySelector('.controls').style.display='none';
     screen2.classList.add('show');
     spawnHearts(18);
+    // add continuous heartbeat to final heart
+    finalHeart.classList.add('heartbeat');
   }, 420);
 });
 
@@ -228,26 +226,17 @@ yesBtn.addEventListener('click', function(){
 backBtn.addEventListener('click', function(){
   screen2.classList.remove('show');
   document.querySelector('.reasons').style.display='';
-  document.querySelector('.gallery').style.display='';
   document.querySelector('.controls').style.display='';
   yesBtn.disabled = false; noBtn.disabled = false;
+  // remove heartbeat in case user goes back
+  finalHeart.classList.remove('heartbeat');
 });
-
-/* ---------- Gallery modal ---------- */
-gallery.querySelectorAll('.thumb').forEach(t=>{
-  t.addEventListener('click', ()=> {
-    modalImg.src = t.dataset.full;
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden','false');
-  });
-});
-modal.addEventListener('click', ()=> { modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); });
 
 /* ---------- Floating hearts ---------- */
 function spawnHearts(count=6){
   for(let i=0;i<count;i++){
     const h = document.createElement('div');
-    h.className='heart';
+    h.className = 'heart';
     const startX = Math.random()*100;
     h.style.left = startX + '%';
     h.style.top = (90 + Math.random()*10) + '%';
@@ -301,8 +290,8 @@ function animateHeart(el){
 
 /* ---------- small accessibility: reveal 2 reasons on load ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
-  setTimeout(()=> revealReason(), 520);
-  setTimeout(()=> revealReason(), 1100);
+  setTimeout(()=> revealReason(), 480);
+  setTimeout(()=> revealReason(), 980);
   setInterval(()=> spawnHearts(1), 2500);
 });
 
