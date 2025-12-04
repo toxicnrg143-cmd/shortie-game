@@ -1,17 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Question for Shortie</title>
-    <meta name="description" content="A special question just for you" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Question for Shortie 💗</title>
+  <style>
+    :root{ --bg:#fff5f8; --card:#fff; --accent:#ff6b81; --muted:#666; }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;background:var(--bg);}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+    .card{
+      width:100%;max-width:420px;background:var(--card);border-radius:18px;padding:26px;text-align:center;
+      box-shadow:0 10px 30px rgba(20,10,30,0.08);position:relative;overflow:visible;
+    }
+    h1{font-size:22px;margin:6px 0;color:#222}
+    p.lead{color:var(--muted);margin:8px 0 18px;font-size:15px}
+    .controls{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;height:84px}
+    button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 6px 14px rgba(30,20,40,0.06);transition:transform .12s}
+    #yes{background:var(--accent);color:white;min-width:140px}
+    #no{background:#f0f0f2;color:#111;min-width:100px;position:absolute;left:calc(50% + 80px);top:0}
+    .result{display:none;margin-top:16px;padding:12px;border-radius:12px;background:#fff7fb;color:#7a2f45}
+    canvas.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;border-radius:18px}
+    @media (max-width:420px){ .controls{height:120px} #no{left:unset;position:absolute;right:18px;top:18px} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <canvas class="confetti" id="confetti"></canvas>
+
+      <h1>Shortie… will you be my girlfriend? 💗</h1>
+      <p class="lead">I made this little thing just for you — press Yes when you’re ready 😊</p>
+
+      <div class="controls">
+        <button id="yes">Yes — I’d love to! ✨</button>
+        <button id="no">No</button>
+      </div>
+
+      <div class="result" id="result">
+        <strong>YAY — Thank you, Shortie! 😌</strong>
+        <div style="margin-top:8px">I’m so happy. I’ll text you soon to plan something nice. 💖</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- runaway NO button (desktop + mobile) ---------- */
+    const no = document.getElementById('no');
+    const yes = document.getElementById('yes');
+    const card = document.getElementById('card');
+    const result = document.getElementById('result');
+
+    function placeNoRandom() {
+      const cardRect = card.getBoundingClientRect();
+      const noRect = no.getBoundingClientRect();
+      const pad = 10;
+      const maxX = Math.max(1, cardRect.width - noRect.width - pad);
+      const maxY = Math.max(1, cardRect.height - noRect.height - pad - 20);
+      let x, y, tries=0;
+      const yesRect = yes.getBoundingClientRect();
+      do {
+        x = Math.floor(Math.random() * (maxX - pad)) + pad;
+        y = Math.floor(Math.random() * (maxY - pad)) + pad + 30;
+        tries++;
+        const yesRel = {x: yesRect.left - cardRect.left, y: yesRect.top - cardRect.top, w: yesRect.width, h: yesRect.height};
+        const noRel = {x, y, w: noRect.width, h: noRect.height};
+        const overlap = !(noRel.x + noRel.w < yesRel.x || noRel.x > yesRel.x + yesRel.w || noRel.y + noRel.h < yesRel.y || noRel.y > yesRel.y + yesRel.h);
+        if(!overlap) break;
+      } while(tries < 12);
+      no.style.left = x + 'px';
+      no.style.top = y + 'px';
+      no.style.position = 'absolute';
+    }
+
+    no.addEventListener('mouseenter', placeNoRandom);
+    no.addEventListener('touchstart', function(e){ e.preventDefault(); placeNoRandom(); }, {passive:false});
+
+    no.addEventListener('click', function(e){
+      e.preventDefault();
+      alert("Haha — try the heart button instead 😅");
+      placeNoRandom();
+    });
+
+    /* ---------- YES behavior: show message + confetti ---------- */
+    yes.addEventListener('click', function(){
+      yes.disabled = true; no.disabled = true;
+      result.style.display = 'block';
+      yes.textContent = "You said yes! 😭❤️";
+      burstConfetti();
+      try {
+        if(window.speechSynthesis) {
+          const u = new SpeechSynthesisUtterance("Yay! Thank you, that makes me really happy.");
+          u.lang = 'en-US';
+          window.speechSynthesis.speak(u);
+        }
+      } catch(e){}
+    });
+
+    /* ---------- small confetti engine ---------- */
+    (function(){
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      let parts = [];
+      function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function rand(min,max){ return Math.random()*(max-min)+min; }
+      window.burstConfetti = function(count=80){
+        parts = [];
+        for(let i=0;i<count;i++){
+          parts.push({
+            x: canvas.width/2 + rand(-40,40),
+            y: canvas.height/3 + rand(-20,20),
+            vx: rand(-4,4), vy: rand(-6,2),
+            size: Math.floor(rand(5,10)),
+            rot: rand(0,Math.PI*2),
+            dr: rand(-0.12,0.12),
+            color: ['#ff6b81','#ffd166','#7ae7c7','#b39eff'][Math.floor(rand(0,4))],
+            life: Math.floor(rand(60,110))
+          });
+        }
+        (function loop(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          for(let i=parts.length-1;i>=0;i--){
+            const p = parts[i];
+            p.vy += 0.18;
+            p.x += p.vx; p.y += p.vy; p.rot += p.dr; p.life--;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+            ctx.restore();
+            if(p.y > canvas.height + 20 || p.x < -50 || p.x > canvas.width + 50 || p.life <= 0) parts.splice(i,1);
+          }
+          if(parts.length) requestAnimationFrame(loop);
+        })();
+      };
+    })();
+  </script>
+</body>
 </html>
