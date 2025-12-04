@@ -1,140 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Question for Shortie 💗</title>
-  <style>
-    :root{ --bg:#fff5f8; --card:#fff; --accent:#ff6b81; --muted:#666; }
-    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;background:var(--bg);}
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .card{
-      width:100%;max-width:420px;background:var(--card);border-radius:18px;padding:26px;text-align:center;
-      box-shadow:0 10px 30px rgba(20,10,30,0.08);position:relative;overflow:visible;
-    }
-    h1{font-size:22px;margin:6px 0;color:#222}
-    p.lead{color:var(--muted);margin:8px 0 18px;font-size:15px}
-    .controls{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;height:84px}
-    button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 6px 14px rgba(30,20,40,0.06);transition:transform .12s}
-    #yes{background:var(--accent);color:white;min-width:140px}
-    #no{background:#f0f0f2;color:#111;min-width:100px;position:absolute;left:calc(50% + 80px);top:0}
-    .result{display:none;margin-top:16px;padding:12px;border-radius:12px;background:#fff7fb;color:#7a2f45}
-    canvas.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;border-radius:18px}
-    @media (max-width:420px){ .controls{height:120px} #no{left:unset;position:absolute;right:18px;top:18px} }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shortie — A question 💗</title>
+<style>
+  :root{
+    --bg:#fff4f8; --card:#fff; --accent:#ff6b81; --muted:#6b6b6b;
+    --accent-2:#ffd166; --accent-3:#7ae7c7;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;background:linear-gradient(180deg,var(--bg),#fff);-webkit-font-smoothing:antialiased}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+  .card{
+    width:100%;max-width:720px;background:var(--card);border-radius:18px;padding:28px 26px;text-align:center;
+    box-shadow:0 14px 40px rgba(20,10,30,0.07);position:relative;overflow:visible;
+  }
+  h1{font-size:26px;margin:4px 0 8px;color:#222}
+  p.lead{color:var(--muted);margin:6px 0 18px;font-size:15px}
+  .controls{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;padding-top:6px}
+  button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 8px 18px rgba(30,20,40,0.06);transition:transform .12s,box-shadow .12s}
+  button:active{transform:translateY(1px)}
+  #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:160px}
+  #no{background:#f3f3f4;color:#111;min-width:90px;position:absolute;right:20px;top:14px}
+  /* reasons area */
+  .reasons{margin-top:18px;text-align:left;max-height:220px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+  .reason{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;opacity:0;transform:translateY(8px) scale(.98)}
+  .reason.show{opacity:1;transform:none;transition:all .35s cubic-bezier(.2,.9,.3,1)}
+  .reason .dot{width:20px;height:20px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:12px}
+  .reason p{margin:0;color:#333}
+  /* small gallery */
+  .gallery{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .thumb{width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid rgba(0,0,0,0.04);cursor:pointer;object-fit:cover;box-shadow:0 8px 20px rgba(20,10,30,0.05);transition:transform .15s}
+  .thumb:hover{transform:scale(1.06)}
+  /* heart floaters */
+  .hearts{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+  .heart{position:absolute;width:18px;height:18px;background:radial-gradient(circle at 30% 30%,#fff,#fff0),linear-gradient(180deg,#ff6b81,#ff4770);transform:rotate(-45deg);border-radius:4px 4px 16px 16px;opacity:.9}
+  /* second screen */
+  .screen2{display:none;padding:24px;text-align:center}
+  .screen2.show{display:block;animation:fadeIn .4s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .finalHeart{font-size:42px;margin-top:10px;animation:pop 700ms cubic-bezier(.2,.9,.3,1)}
+  @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.08)}100%{transform:none}}
+  /* tooltip */
+  .tooltip{position:absolute;padding:6px 8px;border-radius:8px;background:#222;color:#fff;font-size:13px;transform:translateY(-8px);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s}
+  .tooltip.show{opacity:1}
+  /* modal for gallery */
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:999}
+  .modal.show{display:flex}
+  .modal img{max-width:92%;max-height:84%;border-radius:12px;box-shadow:0 18px 60px rgba(10,10,20,0.6)}
+  /* responsive */
+  @media (max-width:520px){
+    .card{padding:20px}
+    #no{right:12px;top:12px}
+    .thumb{width:60px;height:60px}
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card" id="card">
-      <canvas class="confetti" id="confetti"></canvas>
+<div class="hearts" id="hearts"></div>
 
-      <h1>Shortie… will you be my girlfriend? 💗</h1>
-      <p class="lead">I made this little thing just for you — press Yes when you’re ready 😊</p>
+<div class="wrap">
+  <div class="card" id="card">
+    <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(20,10,30,0.04)">
+      <span style="font-size:20px">💘</span>
+    </div>
 
-      <div class="controls">
-        <button id="yes">Yes — I’d love to! ✨</button>
-        <button id="no">No</button>
-      </div>
+    <h1>Shortie… will you be my girlfriend? 💗</h1>
+    <p class="lead">I made this little thing just for you — press Yes when you're ready. Or try to catch the No button if you're brave 😄</p>
 
-      <div class="result" id="result">
-        <strong>YAY — Thank you, Shortie! 😌</strong>
-        <div style="margin-top:8px">I’m so happy. I’ll text you soon to plan something nice. 💖</div>
+    <div class="controls">
+      <button id="yes">Yes — I’d love to! ✨</button>
+      <button id="no">No</button>
+      <div id="tooltip" class="tooltip" aria-hidden="true">Please don't say no... 💧</div>
+    </div>
+
+    <div class="reasons" id="reasons" aria-live="polite">
+      <!-- reasons will be appended here -->
+    </div>
+
+    <div class="gallery" id="gallery">
+      <!-- thumbnails (placeholders) -->
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=21" src="https://picsum.photos/200/200?random=21" alt="mem1">
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=22" src="https://picsum.photos/200/200?random=22" alt="mem2">
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=23" src="https://picsum.photos/200/200?random=23" alt="mem3">
+    </div>
+
+    <!-- second screen (hidden until YES) -->
+    <div class="screen2" id="screen2" aria-hidden="true">
+      <h2>YAY — Thank you, Shortie! 😭❤️</h2>
+      <p style="color:var(--muted)">I knew you'd say yes. I made a little gallery of our moments — click them anytime.</p>
+      <div class="finalHeart">💖</div>
+      <div style="margin-top:18px">
+        <button id="back" style="background:#fff;border:2px solid #ffdfe6;padding:10px 16px;border-radius:12px;cursor:pointer">Back to the card</button>
       </div>
     </div>
+
   </div>
+</div>
 
-  <script>
-    /* ---------- runaway NO button (desktop + mobile) ---------- */
-    const no = document.getElementById('no');
-    const yes = document.getElementById('yes');
-    const card = document.getElementById('card');
-    const result = document.getElementById('result');
+<!-- modal for gallery -->
+<div class="modal" id="modal" aria-hidden="true">
+  <img id="modalImg" src="" alt="photo">
+</div>
 
-    function placeNoRandom() {
-      const cardRect = card.getBoundingClientRect();
-      const noRect = no.getBoundingClientRect();
-      const pad = 10;
-      const maxX = Math.max(1, cardRect.width - noRect.width - pad);
-      const maxY = Math.max(1, cardRect.height - noRect.height - pad - 20);
-      let x, y, tries=0;
-      const yesRect = yes.getBoundingClientRect();
-      do {
-        x = Math.floor(Math.random() * (maxX - pad)) + pad;
-        y = Math.floor(Math.random() * (maxY - pad)) + pad + 30;
-        tries++;
-        const yesRel = {x: yesRect.left - cardRect.left, y: yesRect.top - cardRect.top, w: yesRect.width, h: yesRect.height};
-        const noRel = {x, y, w: noRect.width, h: noRect.height};
-        const overlap = !(noRel.x + noRel.w < yesRel.x || noRel.x > yesRel.x + yesRel.w || noRel.y + noRel.h < yesRel.y || noRel.y > yesRel.y + yesRel.h);
-        if(!overlap) break;
-      } while(tries < 12);
-      no.style.left = x + 'px';
-      no.style.top = y + 'px';
-      no.style.position = 'absolute';
+<!-- confetti canvas -->
+<canvas id="confetti" style="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999"></canvas>
+
+<script>
+/* ====== Interactive features ====== */
+const reasonsList = [
+  "Because you make my favourite playlists feel better.",
+  "Because your laugh fixes my entire day.",
+  "Because you get my weird jokes.",
+  "Because you’re kind even when no one’s watching.",
+  "Because I want to make you chai exactly the way you like.",
+  "Because even boring days are fun with you.",
+  "Because you make me want to be better.",
+  "Because I secretly remember the little things you say.",
+  "Because I’ll learn your favourite movie so we can watch together.",
+  "Because I already like you so much."
+];
+
+const reasonsEl = document.getElementById('reasons');
+const noBtn = document.getElementById('no');
+const yesBtn = document.getElementById('yes');
+const tooltip = document.getElementById('tooltip');
+const screen2 = document.getElementById('screen2');
+const backBtn = document.getElementById('back');
+const gallery = document.getElementById('gallery');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const hearts = document.getElementById('hearts');
+
+/* create reason elements (hidden) */
+reasonsList.forEach((text,i)=>{
+  const r = document.createElement('div');
+  r.className='reason';
+  r.innerHTML = `<div class="dot">❤️</div><p>${text}</p>`;
+  reasonsEl.appendChild(r);
+});
+
+/* show reasons one by one when user mouses near NO or taps it */
+let shown = 0;
+function revealReason(){
+  if(shown >= reasonsList.length) return;
+  const node = reasonsEl.children[shown];
+  node.classList.add('show');
+  // small float animation
+  node.style.transitionDelay = (shown*60) + 'ms';
+  shown++;
+}
+
+/* tooltip logic - follows the no button */
+function positionTooltip(){
+  const noRect = noBtn.getBoundingClientRect();
+  tooltip.style.left = (noRect.left + noRect.width/2 - tooltip.offsetWidth/2) + 'px';
+  tooltip.style.top = (noRect.top - 10) + 'px';
+}
+
+/* move NO button to random place inside card */
+function moveNoRandom(){
+  const card = document.getElementById('card');
+  const cardRect = card.getBoundingClientRect();
+  const noRect = noBtn.getBoundingClientRect();
+  const pad = 12;
+  const maxX = Math.max(1, cardRect.width - noRect.width - pad);
+  const maxY = Math.max(1, cardRect.height - noRect.height - pad);
+  let x,y,tries=0;
+  const yesRect = yesBtn.getBoundingClientRect();
+  do {
+    x = Math.floor(Math.random() * (maxX - pad)) + pad;
+    y = Math.floor(Math.random() * (maxY - pad)) + pad + 30;
+    tries++;
+    const yesRel = {x: yesRect.left - cardRect.left, y: yesRect.top - cardRect.top, w: yesRect.width, h: yesRect.height};
+    const noRel = {x, y, w: noRect.width, h: noRect.height};
+    const overlap = !(noRel.x + noRel.w < yesRel.x || noRel.x > yesRel.x + yesRel.w || noRel.y + noRel.h < yesRel.y || noRel.y > yesRel.y + yesRel.h);
+    if(!overlap) break;
+  } while(tries < 12);
+  noBtn.style.position='absolute';
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
+  // show playful tooltip and reveal a reason
+  tooltip.classList.add('show');
+  tooltip.textContent = ["Please? 😢","I'll make you smile!","Pretty please?","I’ll bring snacks","You look beautiful today","Pinky promise I'll be good"][Math.floor(Math.random()*6)];
+  positionTooltip();
+  setTimeout(()=>tooltip.classList.remove('show'),1600);
+  revealReason();
+}
+
+/* attach events */
+noBtn.addEventListener('mouseenter', moveNoRandom);
+noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); moveNoRandom(); }, {passive:false});
+noBtn.addEventListener('click', function(e){ e.preventDefault(); tooltip.textContent="Haha I know 😅"; tooltip.classList.add('show'); positionTooltip(); setTimeout(()=>tooltip.classList.remove('show'),1400); moveNoRandom(); });
+
+/* make YES show screen2 and confetti */
+yesBtn.addEventListener('click', function(){
+  // animate
+  yesBtn.disabled = true; noBtn.disabled = true;
+  startConfetti();
+  setTimeout(()=> {
+    // hide main card content and show screen2 within card
+    document.querySelector('.reasons').style.display='none';
+    document.querySelector('.gallery').style.display='none';
+    document.querySelector('.controls').style.display='none';
+    screen2.classList.add('show');
+    // floating hearts burst
+    spawnHearts(20);
+  }, 400);
+});
+
+/* back button */
+backBtn.addEventListener('click', function(){
+  screen2.classList.remove('show');
+  document.querySelector('.reasons').style.display='';
+  document.querySelector('.gallery').style.display='';
+  document.querySelector('.controls').style.display='';
+  yesBtn.disabled = false; noBtn.disabled = false;
+});
+
+/* gallery modal */
+gallery.querySelectorAll('.thumb').forEach(t => {
+  t.addEventListener('click', ()=> {
+    modalImg.src = t.dataset.full;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+  });
+});
+modal.addEventListener('click', ()=> { modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); });
+
+/* floating hearts generator */
+function spawnHearts(count=12){
+  for(let i=0;i<count;i++){
+    const h = document.createElement('div');
+    h.className='heart';
+    const startX = Math.random()*100; // % left
+    h.style.left = startX + '%';
+    h.style.top = (90 + Math.random()*10) + '%';
+    const s = 0.6 + Math.random()*1.2;
+    h.style.transform = `scale(${s}) rotate(-45deg)`;
+    hearts.appendChild(h);
+    animateHeart(h);
+    setTimeout(()=>{ try{ h.remove(); }catch(e){} }, 6000);
+  }
+}
+function animateHeart(el){
+  const duration = 4500 + Math.random()*2000;
+  const start = performance.now();
+  const fromY = parseFloat(el.style.top);
+  const toY = -10 - Math.random()*20;
+  const startX = parseFloat(el.style.left);
+  const sway = 8 + Math.random()*18;
+  function frame(t){
+    const p = (t - start)/duration;
+    if(p>=1){ el.style.top = toY + '%'; return; }
+    const ease = 1 - Math.pow(1-p,3);
+    el.style.top = (fromY + (toY-fromY)*ease) + '%';
+    el.style.left = (startX + Math.sin(p*Math.PI*2)*sway) + '%';
+    el.style.opacity = 1 - p;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ===== small confetti engine ===== */
+(function(){
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  let W=canvas.width=innerWidth, H=canvas.height=innerHeight, parts=[];
+  window.addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=innerHeight; });
+  function rand(a,b){return Math.random()*(b-a)+a;}
+  window.startConfetti = function(count=110){
+    parts=[];
+    for(let i=0;i<count;i++){
+      parts.push({
+        x: W/2 + rand(-40,40),
+        y: H/3 + rand(-20,20),
+        vx: rand(-6,6), vy: rand(-11,2),
+        size: Math.floor(rand(6,12)),
+        rot: rand(0,Math.PI*2), dr: rand(-0.12,0.12),
+        color: ['#ff6b81','#ffd166','#7ae7c7','#b39eff'][Math.floor(rand(0,4))],
+        life: Math.floor(rand(60,140))
+      });
     }
+    (function loop(){ ctx.clearRect(0,0,W,H); for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.vy += 0.2; p.x += p.vx; p.y += p.vy; p.rot += p.dr; p.life--; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); ctx.restore(); if(p.y>H+20||p.x<-50||p.x>W+50||p.life<=0) parts.splice(i,1);} if(parts.length) requestAnimationFrame(loop); })();
+  }
+})();
 
-    no.addEventListener('mouseenter', placeNoRandom);
-    no.addEventListener('touchstart', function(e){ e.preventDefault(); placeNoRandom(); }, {passive:false});
+/* ===== small accessibility & auto-reveal if user "attacks" No many times ===== */
+let attempt = 0;
+noBtn.addEventListener('mouseover', ()=>{ attempt++; if(attempt % 2 === 0) revealReason(); });
+noBtn.addEventListener('touchstart', ()=>{ attempt++; if(attempt % 2 === 0) revealReason(); });
 
-    no.addEventListener('click', function(e){
-      e.preventDefault();
-      alert("Haha — try the heart button instead 😅");
-      placeNoRandom();
-    });
+/* ensure tooltip repositions on scroll/resize */
+window.addEventListener('resize', positionTooltip);
+window.addEventListener('scroll', positionTooltip);
 
-    /* ---------- YES behavior: show message + confetti ---------- */
-    yes.addEventListener('click', function(){
-      yes.disabled = true; no.disabled = true;
-      result.style.display = 'block';
-      yes.textContent = "You said yes! 😭❤️";
-      burstConfetti();
-      try {
-        if(window.speechSynthesis) {
-          const u = new SpeechSynthesisUtterance("Yay! Thank you, that makes me really happy.");
-          u.lang = 'en-US';
-          window.speechSynthesis.speak(u);
-        }
-      } catch(e){}
-    });
-
-    /* ---------- small confetti engine ---------- */
-    (function(){
-      const canvas = document.getElementById('confetti');
-      const ctx = canvas.getContext('2d');
-      let parts = [];
-      function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
-      window.addEventListener('resize', resize);
-      resize();
-
-      function rand(min,max){ return Math.random()*(max-min)+min; }
-      window.burstConfetti = function(count=80){
-        parts = [];
-        for(let i=0;i<count;i++){
-          parts.push({
-            x: canvas.width/2 + rand(-40,40),
-            y: canvas.height/3 + rand(-20,20),
-            vx: rand(-4,4), vy: rand(-6,2),
-            size: Math.floor(rand(5,10)),
-            rot: rand(0,Math.PI*2),
-            dr: rand(-0.12,0.12),
-            color: ['#ff6b81','#ffd166','#7ae7c7','#b39eff'][Math.floor(rand(0,4))],
-            life: Math.floor(rand(60,110))
-          });
-        }
-        (function loop(){
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          for(let i=parts.length-1;i>=0;i--){
-            const p = parts[i];
-            p.vy += 0.18;
-            p.x += p.vx; p.y += p.vy; p.rot += p.dr; p.life--;
-            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
-            ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
-            ctx.restore();
-            if(p.y > canvas.height + 20 || p.x < -50 || p.x > canvas.width + 50 || p.life <= 0) parts.splice(i,1);
-          }
-          if(parts.length) requestAnimationFrame(loop);
-        })();
-      };
-    })();
-  </script>
+/* initial gentle entrance for card elements */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // animate first two reasons gradually to make it feel alive
+  setTimeout(()=>{ revealReason(); }, 600);
+  setTimeout(()=>{ revealReason(); }, 1200);
+  // spawn tiny hearts in background slowly
+  setInterval(()=>{ spawnHearts(1); }, 2000);
+});
+</script>
 </body>
 </html>
