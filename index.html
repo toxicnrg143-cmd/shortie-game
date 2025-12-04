@@ -21,8 +21,15 @@
   .controls{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;padding-top:6px}
   button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 10px 26px rgba(30,20,40,0.06);transition:transform .16s,box-shadow .16s}
   button:active{transform:translateY(1px)}
+  /* Yes button */
   #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:180px;font-weight:600;transform-origin:center}
-  #no{background:#f3f3f4;color:#111;min-width:110px;position:absolute;right:18px;top:12px}
+  /* No button: smaller and sleeker */
+  #no{
+    background:#f3f3f4;color:#111;min-width:76px;padding:8px 12px;font-size:14px;
+    position:absolute; right:18px; top:12px;
+    border-radius:12px; box-shadow:0 8px 18px rgba(20,10,30,0.06);
+    transition: left 180ms cubic-bezier(.2,.9,.3,1), top 180ms cubic-bezier(.2,.9,.3,1);
+  }
   /* reasons container - hidden initially */
   #reasonsContainer{display:none;margin-top:18px;text-align:left}
   #reasonsContainer h3{margin:0 0 10px 0; color:#8a3140; font-size:17px; text-align:left}
@@ -203,25 +210,42 @@ function revealReason(){
   lastReveal = now;
 }
 
-/* ---------- Move NO button to random safe place (on hover/touch/click) ---------- */
+/* ---------- Move NO button to random safe place (constrained inside the card) ---------- */
 function moveNo(){
   const cardRect = card.getBoundingClientRect();
   const noRect = noBtn.getBoundingClientRect();
+
+  // inner padding inside card where button can move
   const pad = 12;
-  const maxX = Math.max(1, cardRect.width - noRect.width - pad);
-  const maxY = Math.max(1, cardRect.height - noRect.height - pad - 20);
-  let x,y,tries=0;
+  // calculate maximum x,y relative to card's content box
+  const maxX = Math.max(0, cardRect.width - noRect.width - pad - 6); // small extra margin
+  const maxY = Math.max(0, cardRect.height - noRect.height - pad - 30); // avoid header overlap
+
+  // pick random x,y within [pad, maxX]
+  let x = Math.floor(Math.random() * (maxX + 1)) + pad;
+  let y = Math.floor(Math.random() * (maxY + 1)) + pad + 24; // push down a bit for header
+
+  // clamp just in case
+  x = Math.max(pad, Math.min(x, cardRect.width - noRect.width - pad));
+  y = Math.max(pad + 12, Math.min(y, cardRect.height - noRect.height - pad - 8));
+
+  // ensure the chosen spot does not overlap Yes button area too closely
   const yesRect = yesBtn.getBoundingClientRect();
-  do {
-    x = Math.floor(Math.random() * (maxX - pad)) + pad;
-    y = Math.floor(Math.random() * (maxY - pad)) + pad + 30;
-    tries++;
-    const yesRel = {x: yesRect.left - cardRect.left, y: yesRect.top - cardRect.top, w: yesRect.width, h: yesRect.height};
-    const noRel = {x, y, w: noRect.width, h: noRect.height};
-    const overlap = !(noRel.x + noRel.w < yesRel.x || noRel.x > yesRel.x + yesRel.w || noRel.y + noRel.h < yesRel.y || noRel.y > yesRel.y + yesRel.h);
-    if(!overlap) break;
-  } while(tries < 12);
-  noBtn.style.position='absolute';
+  const yesRel = {x: yesRect.left - cardRect.left, y: yesRect.top - cardRect.top, w: yesRect.width, h: yesRect.height};
+  const noRel = {x, y, w: noRect.width, h: noRect.height};
+  const overlap = !(noRel.x + noRel.w < yesRel.x || noRel.x > yesRel.x + yesRel.w || noRel.y + noRel.h < yesRel.y || noRel.y > yesRel.y + yesRel.h);
+  if (overlap) {
+    // move to alternate side: flip horizontally if possible
+    if (x + noRect.width + 40 < cardRect.width) {
+      x = Math.min(cardRect.width - noRect.width - pad, yesRel.x + yesRel.w + 18);
+    } else {
+      x = Math.max(pad, yesRel.x - noRect.width - 18);
+    }
+    // clamp again
+    x = Math.max(pad, Math.min(x, cardRect.width - noRect.width - pad));
+  }
+
+  // apply position relative to card by setting style.left/top (card is positioned relative)
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 
@@ -232,6 +256,17 @@ function moveNo(){
 }
 
 /* ---------- No button events ---------- */
+// manual initial placement: ensure it's inside card on load
+function placeNoInitial(){
+  const cardRect = card.getBoundingClientRect();
+  const noRect = noBtn.getBoundingClientRect();
+  const pad = 12;
+  const startX = Math.max(pad, Math.min(cardRect.width - noRect.width - pad,  cardRect.width - noRect.width - pad));
+  const startY = 12;
+  noBtn.style.left = startX + 'px';
+  noBtn.style.top = startY + 'px';
+}
+
 // hover (desktop)
 noBtn.addEventListener('mouseenter', moveNo);
 // touchstart for mobile - only triggers move/reason once per touchstart (cooldown applies)
@@ -327,6 +362,8 @@ backBtn.addEventListener('click', function(){
   reasonsEl.setAttribute('aria-hidden','true');
   reasonsContainer.style.display = 'none';
   yesBtn.textContent = "Yes — I’d love to! ✨";
+  // put No back near its original spot
+  placeNoInitial();
 });
 
 /* ---------- Floating hearts ---------- */
@@ -396,6 +433,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   Array.from(reasonsEl.children).forEach(node => node.classList.remove('show'));
   // gentle one-heart interval in background
   setInterval(()=> spawnHearts(1), 3500);
+  // place No initially inside the card bounds
+  // small timeout to ensure layout measured correctly
+  setTimeout(placeNoInitial, 120);
 });
 
 /* ---------- card hover bounce ---------- */
