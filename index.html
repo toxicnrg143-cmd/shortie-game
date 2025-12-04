@@ -23,8 +23,10 @@
   button:active{transform:translateY(1px)}
   #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:180px;font-weight:600;transform-origin:center}
   #no{background:#f3f3f4;color:#111;min-width:110px;position:absolute;right:18px;top:12px}
-  /* reasons area - start hidden */
-  .reasons{display:none;margin-top:18px;text-align:left;max-height:220px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff8fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+  /* reasons container - hidden initially */
+  #reasonsContainer{display:none;margin-top:18px;text-align:left}
+  #reasonsContainer h3{margin:0 0 10px 0; color:#8a3140; font-size:17px; text-align:left}
+  .reasons{display:none;max-height:220px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff8fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
   .reason{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;opacity:0;transform:translateY(12px) scale(.98)}
   .reason.show{opacity:1;transform:none;transition:all .36s cubic-bezier(.2,.9,.3,1)}
   .reason .dot{width:18px;height:18px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px}
@@ -61,6 +63,7 @@
   @media (max-width:520px){
     .card{padding:18px}
     #no{right:12px;top:10px}
+    #reasonsContainer h3{font-size:15px}
   }
 </style>
 </head>
@@ -82,7 +85,11 @@
       <div id="tooltip" class="tooltip" aria-hidden="true">Please?</div>
     </div>
 
-    <div class="reasons" id="reasons" aria-live="polite" aria-hidden="true"></div>
+    <!-- reasons container with heading (hidden until first reveal) -->
+    <div id="reasonsContainer">
+      <h3>Reasons we should be together ❤️</h3>
+      <div class="reasons" id="reasons" aria-live="polite" aria-hidden="true"></div>
+    </div>
 
     <!-- final box (shown after yes) -->
     <div class="screen2" id="screen2" aria-hidden="true">
@@ -131,6 +138,7 @@ const hoverMessages = [
 
 /* ---------- Elements ---------- */
 const reasonsEl = document.getElementById('reasons');
+const reasonsContainer = document.getElementById('reasonsContainer');
 const noBtn = document.getElementById('no');
 const yesBtn = document.getElementById('yes');
 const tooltip = document.getElementById('tooltip');
@@ -176,6 +184,11 @@ function revealReason(){
   const now = Date.now();
   if (shown >= reasonsList.length) return;
   if (now - lastReveal < REVEAL_COOLDOWN) return; // still cooling down
+
+  // show container heading (only once on first reveal)
+  if (reasonsContainer.style.display === 'none' || getComputedStyle(reasonsContainer).display === 'none') {
+    reasonsContainer.style.display = 'block';
+  }
 
   // ensure reasons container becomes visible on first reveal
   if (reasonsEl.style.display === 'none' || reasonsEl.getAttribute('aria-hidden') === 'true') {
@@ -266,33 +279,21 @@ function playYesChime(){
 function speakFinalLines(){
   if (!('speechSynthesis' in window)) return;
   try {
-    // Cancel any previous queued speech
     window.speechSynthesis.cancel();
-
-    // First line
     const u1 = new SpeechSynthesisUtterance("YAY. Thank you, Shortie!");
     u1.rate = 0.95;
     u1.pitch = 1.05;
-
-    // Second line
-    const u2 = new SpeechSynthesisUtterance("I knew you'd say yes.");
+    const u2 = new SpeechSynthesisUtterance("I knew you'd say yes");
     u2.rate = 0.95;
     u2.pitch = 1.05;
-
-    // On end of first, speak second
     u1.onend = () => { try { window.speechSynthesis.speak(u2); } catch(e){ } };
-
-    // Speak first (user gesture required - click qualifies)
     window.speechSynthesis.speak(u1);
   } catch(e) { console.warn('TTS failed', e); }
 }
 
 /* ---------- Yes behavior: chime + TTS + confetti + final box + heartbeat ---------- */
 yesBtn.addEventListener('click', function(){
-  // speak the final lines (this is the "person who spoke" feature)
   speakFinalLines();
-
-  // play chime
   playYesChime();
 
   yesBtn.disabled = true; noBtn.disabled = true;
@@ -302,12 +303,11 @@ yesBtn.addEventListener('click', function(){
   setTimeout(()=> yesBtn.classList.remove('pulse'), 1200);
 
   setTimeout(()=> {
-    // hide the controls and reasons, show final box (matching your screenshot text)
     document.querySelector('.reasons').style.display='none';
     document.querySelector('.controls').style.display='none';
     screen2.classList.add('show');
     spawnHearts(18);
-    finalHeart.classList.add('heartbeat'); // continuous heartbeat
+    finalHeart.classList.add('heartbeat');
     yesBtn.textContent = "You said yes! ❤";
   }, 420);
 });
@@ -325,6 +325,7 @@ backBtn.addEventListener('click', function(){
   Array.from(reasonsEl.children).forEach(node => node.classList.remove('show'));
   reasonsEl.style.display = 'none';
   reasonsEl.setAttribute('aria-hidden','true');
+  reasonsContainer.style.display = 'none';
   yesBtn.textContent = "Yes — I’d love to! ✨";
 });
 
@@ -389,6 +390,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // ensure reasons are hidden and cleared on start
   reasonsEl.style.display = 'none';
   reasonsEl.setAttribute('aria-hidden','true');
+  reasonsContainer.style.display = 'none';
   shown = 0;
   lastReveal = 0;
   Array.from(reasonsEl.children).forEach(node => node.classList.remove('show'));
