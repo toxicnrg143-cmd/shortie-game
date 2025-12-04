@@ -14,36 +14,37 @@
   .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
   .card{
     width:100%;max-width:720px;background:var(--card);border-radius:18px;padding:28px 26px;text-align:center;
-    box-shadow:0 14px 40px rgba(20,10,30,0.07);position:relative;overflow:visible;
+    box-shadow:0 18px 50px rgba(20,10,30,0.08);position:relative;overflow:visible;
+    transform:translateY(0); transition:transform .45s cubic-bezier(.2,.9,.3,1);
   }
   h1{font-size:26px;margin:4px 0 8px;color:#222}
   p.lead{color:var(--muted);margin:6px 0 18px;font-size:15px}
   .controls{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;padding-top:6px}
-  button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 8px 18px rgba(30,20,40,0.06);transition:transform .12s,box-shadow .12s}
+  button{border:0;outline:0;padding:12px 20px;border-radius:999px;font-size:16px;cursor:pointer;box-shadow:0 10px 26px rgba(30,20,40,0.06);transition:transform .16s,box-shadow .16s}
   button:active{transform:translateY(1px)}
-  #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:160px}
-  #no{background:#f3f3f4;color:#111;min-width:90px;position:absolute;right:20px;top:14px}
+  #yes{background:linear-gradient(180deg,var(--accent),#ff4770);color:white;min-width:180px;font-weight:600;transform-origin:center}
+  #no{background:#f3f3f4;color:#111;min-width:110px;position:absolute;right:18px;top:12px}
   /* reasons area */
-  .reasons{margin-top:18px;text-align:left;max-height:220px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
-  .reason{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;opacity:0;transform:translateY(8px) scale(.98)}
-  .reason.show{opacity:1;transform:none;transition:all .35s cubic-bezier(.2,.9,.3,1)}
-  .reason .dot{width:20px;height:20px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:12px}
-  .reason p{margin:0;color:#333}
-  /* small gallery */
+  .reasons{margin-top:18px;text-align:left;max-height:200px;overflow:auto;padding:10px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff8fb);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+  .reason{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;opacity:0;transform:translateY(12px) scale(.98)}
+  .reason.show{opacity:1;transform:none;transition:all .36s cubic-bezier(.2,.9,.3,1)}
+  .reason .dot{width:22px;height:22px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:12px}
+  .reason p{margin:0;color:#333;font-size:14px}
+  /* gallery */
   .gallery{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-  .thumb{width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid rgba(0,0,0,0.04);cursor:pointer;object-fit:cover;box-shadow:0 8px 20px rgba(20,10,30,0.05);transition:transform .15s}
+  .thumb{width:72px;height:72px;border-radius:10px;overflow:hidden;border:2px solid rgba(0,0,0,0.04);cursor:pointer;object-fit:cover;box-shadow:0 10px 26px rgba(20,10,30,0.05);transition:transform .15s}
   .thumb:hover{transform:scale(1.06)}
   /* heart floaters */
-  .hearts{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
-  .heart{position:absolute;width:18px;height:18px;background:radial-gradient(circle at 30% 30%,#fff,#fff0),linear-gradient(180deg,#ff6b81,#ff4770);transform:rotate(-45deg);border-radius:4px 4px 16px 16px;opacity:.9}
+  .hearts{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:2}
+  .heart{position:absolute;width:18px;height:18px;background:linear-gradient(180deg,#ff7aa0,#ff4770);transform:rotate(-45deg);border-radius:4px 4px 16px 16px;opacity:.95}
   /* second screen */
   .screen2{display:none;padding:24px;text-align:center}
-  .screen2.show{display:block;animation:fadeIn .4s ease}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .finalHeart{font-size:42px;margin-top:10px;animation:pop 700ms cubic-bezier(.2,.9,.3,1)}
+  .screen2.show{display:block;animation:fadeIn .45s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .finalHeart{font-size:46px;margin-top:10px;animation:pop 700ms cubic-bezier(.2,.9,.3,1)}
   @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.08)}100%{transform:none}}
   /* tooltip */
-  .tooltip{position:absolute;padding:6px 8px;border-radius:8px;background:#222;color:#fff;font-size:13px;transform:translateY(-8px);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s}
+  .tooltip{position:fixed;padding:7px 10px;border-radius:10px;background:#222;color:#fff;font-size:13px;transform:translateY(-8px);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s,left .08s,top .08s}
   .tooltip.show{opacity:1}
   /* modal for gallery */
   .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:999}
@@ -51,8 +52,8 @@
   .modal img{max-width:92%;max-height:84%;border-radius:12px;box-shadow:0 18px 60px rgba(10,10,20,0.6)}
   /* responsive */
   @media (max-width:520px){
-    .card{padding:20px}
-    #no{right:12px;top:12px}
+    .card{padding:18px}
+    #no{right:12px;top:10px}
     .thumb{width:60px;height:60px}
   }
 </style>
@@ -62,66 +63,74 @@
 
 <div class="wrap">
   <div class="card" id="card">
-    <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(20,10,30,0.04)">
-      <span style="font-size:20px">💘</span>
+    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(20,10,30,0.04)">
+      <span style="font-size:22px">💘</span>
     </div>
 
     <h1>Shortie… will you be my girlfriend? 💗</h1>
-    <p class="lead">I made this little thing just for you — press Yes when you're ready. Or try to catch the No button if you're brave 😄</p>
+    <p class="lead">I made this little thing just for you — press Yes when you're ready. Try to catch the No button if you can 😄</p>
 
-    <div class="controls">
+    <div class="controls" id="controls">
       <button id="yes">Yes — I’d love to! ✨</button>
       <button id="no">No</button>
-      <div id="tooltip" class="tooltip" aria-hidden="true">Please don't say no... 💧</div>
+      <div id="tooltip" class="tooltip" aria-hidden="true">Please?</div>
     </div>
 
-    <div class="reasons" id="reasons" aria-live="polite">
-      <!-- reasons will be appended here -->
-    </div>
+    <div class="reasons" id="reasons" aria-live="polite"></div>
 
     <div class="gallery" id="gallery">
-      <!-- thumbnails (placeholders) -->
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=21" src="https://picsum.photos/200/200?random=21" alt="mem1">
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=22" src="https://picsum.photos/200/200?random=22" alt="mem2">
-      <img class="thumb" data-full="https://picsum.photos/800/600?random=23" src="https://picsum.photos/200/200?random=23" alt="mem3">
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=31" src="https://picsum.photos/200/200?random=31" alt="mem1">
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=32" src="https://picsum.photos/200/200?random=32" alt="mem2">
+      <img class="thumb" data-full="https://picsum.photos/800/600?random=33" src="https://picsum.photos/200/200?random=33" alt="mem3">
     </div>
 
-    <!-- second screen (hidden until YES) -->
     <div class="screen2" id="screen2" aria-hidden="true">
       <h2>YAY — Thank you, Shortie! 😭❤️</h2>
-      <p style="color:var(--muted)">I knew you'd say yes. I made a little gallery of our moments — click them anytime.</p>
+      <p style="color:var(--muted)">I knew you'd say yes. Here’s to us. 💖</p>
       <div class="finalHeart">💖</div>
       <div style="margin-top:18px">
-        <button id="back" style="background:#fff;border:2px solid #ffdfe6;padding:10px 16px;border-radius:12px;cursor:pointer">Back to the card</button>
+        <button id="back" style="background:#fff;border:2px solid #ffdfe6;padding:10px 16px;border-radius:12px;cursor:pointer">Back</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- modal for gallery -->
 <div class="modal" id="modal" aria-hidden="true">
   <img id="modalImg" src="" alt="photo">
 </div>
 
-<!-- confetti canvas -->
 <canvas id="confetti" style="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999"></canvas>
 
 <script>
-/* ====== Interactive features ====== */
+/* ---------- Messages (short & cute) ---------- */
 const reasonsList = [
-  "Because you make my favourite playlists feel better.",
-  "Because your laugh fixes my entire day.",
-  "Because you get my weird jokes.",
-  "Because you’re kind even when no one’s watching.",
-  "Because I want to make you chai exactly the way you like.",
-  "Because even boring days are fun with you.",
-  "Because you make me want to be better.",
-  "Because I secretly remember the little things you say.",
-  "Because I’ll learn your favourite movie so we can watch together.",
-  "Because I already like you so much."
+  "I already like you a lot 💗",
+  "Your smile = my favourite 😭",
+  "I’m happiest with you 😊",
+  "We click so naturally ✨",
+  "I want to treat you right ❤️",
+  "We’d be so cute together 🫶",
+  "You make everything better 🌸",
+  "I think about you kinda a lot 😳",
+  "You deserve someone who chooses you 😌",
+  "It’s always been you 💞"
 ];
 
+const hoverMessages = [
+  "Do you not like me? 😟",
+  "Pretty please? 🥺",
+  "Don’t run away 😭",
+  "Think again 👀",
+  "I'll be really good 😇",
+  "Consider this? 🥹",
+  "Come onnn 😭",
+  "Just one yes? 🌸",
+  "Why are you running 😭",
+  "You’re breaking my heart 😩❤️"
+];
+
+/* ---------- Elements ---------- */
 const reasonsEl = document.getElementById('reasons');
 const noBtn = document.getElementById('no');
 const yesBtn = document.getElementById('yes');
@@ -132,41 +141,48 @@ const gallery = document.getElementById('gallery');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 const hearts = document.getElementById('hearts');
+const card = document.getElementById('card');
 
-/* create reason elements (hidden) */
-reasonsList.forEach((text,i)=>{
-  const r = document.createElement('div');
-  r.className='reason';
-  r.innerHTML = `<div class="dot">❤️</div><p>${text}</p>`;
-  reasonsEl.appendChild(r);
+/* ---------- Build reasons (hidden) ---------- */
+reasonsList.forEach((r,i)=>{
+  const el = document.createElement('div');
+  el.className = 'reason';
+  el.innerHTML = `<div class="dot">❤️</div><p>${r}</p>`;
+  reasonsEl.appendChild(el);
 });
 
-/* show reasons one by one when user mouses near NO or taps it */
+/* ---------- Tooltip helper ---------- */
+function showTooltip(text){
+  tooltip.textContent = text;
+  tooltip.classList.add('show');
+  positionTooltip();
+  setTimeout(()=> tooltip.classList.remove('show'),1400);
+}
+function positionTooltip(){
+  const noRect = noBtn.getBoundingClientRect();
+  const left = Math.max(8, noRect.left + noRect.width/2 - tooltip.offsetWidth/2);
+  const top = Math.max(8, noRect.top - tooltip.offsetHeight - 8);
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+
+/* ---------- Reveal reasons one-by-one ---------- */
 let shown = 0;
 function revealReason(){
   if(shown >= reasonsList.length) return;
   const node = reasonsEl.children[shown];
   node.classList.add('show');
-  // small float animation
-  node.style.transitionDelay = (shown*60) + 'ms';
+  node.style.transitionDelay = (shown * 60) + 'ms';
   shown++;
 }
 
-/* tooltip logic - follows the no button */
-function positionTooltip(){
-  const noRect = noBtn.getBoundingClientRect();
-  tooltip.style.left = (noRect.left + noRect.width/2 - tooltip.offsetWidth/2) + 'px';
-  tooltip.style.top = (noRect.top - 10) + 'px';
-}
-
-/* move NO button to random place inside card */
-function moveNoRandom(){
-  const card = document.getElementById('card');
+/* ---------- Move NO button to random safe place ---------- */
+function moveNo(){
   const cardRect = card.getBoundingClientRect();
   const noRect = noBtn.getBoundingClientRect();
   const pad = 12;
   const maxX = Math.max(1, cardRect.width - noRect.width - pad);
-  const maxY = Math.max(1, cardRect.height - noRect.height - pad);
+  const maxY = Math.max(1, cardRect.height - noRect.height - pad - 20);
   let x,y,tries=0;
   const yesRect = yesBtn.getBoundingClientRect();
   do {
@@ -181,36 +197,34 @@ function moveNoRandom(){
   noBtn.style.position='absolute';
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
-  // show playful tooltip and reveal a reason
-  tooltip.classList.add('show');
-  tooltip.textContent = ["Please? 😢","I'll make you smile!","Pretty please?","I’ll bring snacks","You look beautiful today","Pinky promise I'll be good"][Math.floor(Math.random()*6)];
-  positionTooltip();
-  setTimeout(()=>tooltip.classList.remove('show'),1600);
+
+  // show short hover msg and reveal a reason
+  const msg = hoverMessages[Math.floor(Math.random() * hoverMessages.length)];
+  showTooltip(msg);
   revealReason();
 }
 
-/* attach events */
-noBtn.addEventListener('mouseenter', moveNoRandom);
-noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); moveNoRandom(); }, {passive:false});
-noBtn.addEventListener('click', function(e){ e.preventDefault(); tooltip.textContent="Haha I know 😅"; tooltip.classList.add('show'); positionTooltip(); setTimeout(()=>tooltip.classList.remove('show'),1400); moveNoRandom(); });
+/* ---------- No button events ---------- */
+noBtn.addEventListener('mouseenter', moveNo);
+noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); moveNo(); }, {passive:false});
+noBtn.addEventListener('click', function(e){ e.preventDefault(); showTooltip("Haha nice try 😅"); moveNo(); });
 
-/* make YES show screen2 and confetti */
+/* ---------- Yes behavior: confetti + second screen ---------- */
 yesBtn.addEventListener('click', function(){
-  // animate
   yesBtn.disabled = true; noBtn.disabled = true;
   startConfetti();
+  // little pop animation
+  yesBtn.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.2,.9,.3,1)'});
   setTimeout(()=> {
-    // hide main card content and show screen2 within card
     document.querySelector('.reasons').style.display='none';
     document.querySelector('.gallery').style.display='none';
     document.querySelector('.controls').style.display='none';
     screen2.classList.add('show');
-    // floating hearts burst
-    spawnHearts(20);
-  }, 400);
+    spawnHearts(18);
+  }, 420);
 });
 
-/* back button */
+/* ---------- Back from screen2 ---------- */
 backBtn.addEventListener('click', function(){
   screen2.classList.remove('show');
   document.querySelector('.reasons').style.display='';
@@ -219,8 +233,8 @@ backBtn.addEventListener('click', function(){
   yesBtn.disabled = false; noBtn.disabled = false;
 });
 
-/* gallery modal */
-gallery.querySelectorAll('.thumb').forEach(t => {
+/* ---------- Gallery modal ---------- */
+gallery.querySelectorAll('.thumb').forEach(t=>{
   t.addEventListener('click', ()=> {
     modalImg.src = t.dataset.full;
     modal.classList.add('show');
@@ -229,23 +243,21 @@ gallery.querySelectorAll('.thumb').forEach(t => {
 });
 modal.addEventListener('click', ()=> { modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); });
 
-/* floating hearts generator */
-function spawnHearts(count=12){
+/* ---------- Floating hearts ---------- */
+function spawnHearts(count=6){
   for(let i=0;i<count;i++){
     const h = document.createElement('div');
     h.className='heart';
-    const startX = Math.random()*100; // % left
+    const startX = Math.random()*100;
     h.style.left = startX + '%';
     h.style.top = (90 + Math.random()*10) + '%';
-    const s = 0.6 + Math.random()*1.2;
-    h.style.transform = `scale(${s}) rotate(-45deg)`;
     hearts.appendChild(h);
     animateHeart(h);
     setTimeout(()=>{ try{ h.remove(); }catch(e){} }, 6000);
   }
 }
 function animateHeart(el){
-  const duration = 4500 + Math.random()*2000;
+  const duration = 4200 + Math.random()*1800;
   const start = performance.now();
   const fromY = parseFloat(el.style.top);
   const toY = -10 - Math.random()*20;
@@ -263,14 +275,14 @@ function animateHeart(el){
   requestAnimationFrame(frame);
 }
 
-/* ===== small confetti engine ===== */
+/* ---------- Confetti engine ---------- */
 (function(){
   const canvas = document.getElementById('confetti');
   const ctx = canvas.getContext('2d');
   let W=canvas.width=innerWidth, H=canvas.height=innerHeight, parts=[];
   window.addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=innerHeight; });
   function rand(a,b){return Math.random()*(b-a)+a;}
-  window.startConfetti = function(count=110){
+  window.startConfetti = function(count=100){
     parts=[];
     for(let i=0;i<count;i++){
       parts.push({
@@ -287,23 +299,20 @@ function animateHeart(el){
   }
 })();
 
-/* ===== small accessibility & auto-reveal if user "attacks" No many times ===== */
-let attempt = 0;
-noBtn.addEventListener('mouseover', ()=>{ attempt++; if(attempt % 2 === 0) revealReason(); });
-noBtn.addEventListener('touchstart', ()=>{ attempt++; if(attempt % 2 === 0) revealReason(); });
+/* ---------- small accessibility: reveal 2 reasons on load ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(()=> revealReason(), 520);
+  setTimeout(()=> revealReason(), 1100);
+  setInterval(()=> spawnHearts(1), 2500);
+});
 
-/* ensure tooltip repositions on scroll/resize */
+/* ---------- small extra: gentle card hover bounce ---------- */
+document.querySelector('.card').addEventListener('mouseenter', ()=> { document.querySelector('.card').style.transform = 'translateY(-6px)'; });
+document.querySelector('.card').addEventListener('mouseleave', ()=> { document.querySelector('.card').style.transform = 'translateY(0)'; });
+
+/* reposition tooltip on scroll/resize */
 window.addEventListener('resize', positionTooltip);
 window.addEventListener('scroll', positionTooltip);
-
-/* initial gentle entrance for card elements */
-document.addEventListener('DOMContentLoaded', ()=>{
-  // animate first two reasons gradually to make it feel alive
-  setTimeout(()=>{ revealReason(); }, 600);
-  setTimeout(()=>{ revealReason(); }, 1200);
-  // spawn tiny hearts in background slowly
-  setInterval(()=>{ spawnHearts(1); }, 2000);
-});
 </script>
 </body>
 </html>
